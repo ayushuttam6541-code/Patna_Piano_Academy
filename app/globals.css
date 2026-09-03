@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 47.9 95.8% 53.1%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 47.9 95.8% 53.1%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[#0B0B0D] text-[#F5F1E8] font-sans antialiased;
+  }
+}
+
+/* Premium Piano Academy Custom Styles */
+.btn-gold {
+  @apply bg-gradient-to-r from-[#D4AF37] to-[#E8D28A] text-[#0B0B0D] font-semibold 
+         hover:from-[#E8D28A] hover:to-[#D4AF37] transition-all duration-300 
+         shadow-lg hover:shadow-xl;
+}
+
+.btn-gold-outline {
+  @apply border-2 border-[#D4AF37] text-[#D4AF37] font-semibold 
+         hover:bg-[#D4AF37] hover:text-[#0B0B0D] transition-all duration-300;
+}
+
+.card-pp {
+  @apply bg-[#18181B] border border-[#302E2A] rounded-xl;
+}
+
+.bg-card-pp {
+  @apply bg-[#18181B];
+}
+
+.text-muted-pp {
+  @apply text-[#A9A5A0];
+}
+
+.border-pp {
+  @apply border-[#302E2A];
+}
+
+.bg-gold {
+  @apply bg-[#D4AF37];
+}
+
+.text-gold {
+  @apply text-[#D4AF37];
+}
+
+.gold-gradient-text {
+  @apply bg-gradient-to-r from-[#D4AF37] to-[#E8D28A] bg-clip-text text-transparent;
+}
+
+.hero-vignette {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(11, 11, 13, 0.4) 100%);
+}
+
+.piano-keys-decoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    #0B0B0D 0%, #0B0B0D 8%, #FFFFFF 8%, #FFFFFF 10%,
+    #0B0B0D 10%, #0B0B0D 18%, #FFFFFF 18%, #FFFFFF 20%,
+    #0B0B0D 20%, #0B0B0D 28%, #FFFFFF 28%, #FFFFFF 30%,
+    #0B0B0D 30%, #0B0B0D 38%, #FFFFFF 38%, #FFFFFF 40%,
+    #0B0B0D 40%, #0B0B0D 48%, #FFFFFF 48%, #FFFFFF 50%,
+    #0B0B0D 50%, #0B0B0D 58%, #FFFFFF 58%, #FFFFFF 60%,
+    #0B0B0D 60%, #0B0B0D 68%, #FFFFFF 68%, #FFFFFF 70%,
+    #0B0B0D 70%, #0B0B0D 78%, #FFFFFF 78%, #FFFFFF 80%,
+    #0B0B0D 80%, #0B0B0D 88%, #FFFFFF 88%, #FFFFFF 90%,
+    #0B0B0D 90%, #0B0B0D 100%
+  );
+}
+
+.divider-gold {
+  @apply h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent;
+}
+
+/* Animation utilities */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121214;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #302E2A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
