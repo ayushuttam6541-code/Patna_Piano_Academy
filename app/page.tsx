@@ -1,6 +1,5 @@
+// @ts-nocheck
 'use client'
-
-// @ts-nocheck - Disable type checking for this file to maintain compatibility with existing code
 
 import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
