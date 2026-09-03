@@ -53,7 +53,8 @@ const DEFAULT_CLASSES = [
 ]
 
 // ============ API HELPER ============
-async function api(path: string, { method = 'GET', body, token }: { method?: string; body?: any; token?: string } = {}) {
+// @ts-ignore
+async function api(path, { method = 'GET', body, token } = {}) {
   const res = await fetch(`/api/${path}`, {
     method,
     headers: {
