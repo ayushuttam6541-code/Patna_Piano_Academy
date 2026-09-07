@@ -138,6 +138,7 @@ function Navbar({ view, setView, user, logout }: { view: string; setView: (v: st
                       <MenuItem icon={ListChecks} label="Manage Bookings" onClick={() => go('adminBookings')} />
                       <MenuItem icon={BookOpen} label="Manage Classes" onClick={() => go('adminClasses')} />
                       <MenuItem icon={UsersIcon} label="Students" onClick={() => go('adminStudents')} />
+                      <MenuItem icon={MessageCircle} label="Contact Messages" onClick={() => go('adminMessages')} />
                     </>
                   ) : (
                     <>
@@ -178,6 +179,7 @@ function Navbar({ view, setView, user, logout }: { view: string; setView: (v: st
                     <button onClick={() => go('adminBookings')} className="block w-full text-left py-2 text-sm">Manage Bookings</button>
                     <button onClick={() => go('adminClasses')} className="block w-full text-left py-2 text-sm">Manage Classes</button>
                     <button onClick={() => go('adminStudents')} className="block w-full text-left py-2 text-sm">Students</button>
+                    <button onClick={() => go('adminMessages')} className="block w-full text-left py-2 text-sm">Contact Messages</button>
                   </>
                 ) : (
                   <>
@@ -1156,11 +1158,11 @@ function AdminBookings({ token }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
       <h1 className="font-display text-4xl mb-6">Manage Bookings</h1>
       <div className="flex flex-wrap gap-3 mb-6">
-        <Input placeholder="Search student or class..." value={filter.q} onChange={e => setFilter({...filter,q:e.target.value})} className="max-w-xs" />
-        <select value={filter.mode} onChange={e => setFilter({...filter,mode:e.target.value})} className="px-3 py-2 rounded-md">
+        <Input placeholder="Search student or class..." value={filter.q} onChange={e => setFilter({...filter,q:e.target.value})} className="max-w-xs bg-[#18181B] border-[#302E2A] text-[#F5F1E8]" />
+        <select value={filter.mode} onChange={e => setFilter({...filter,mode:e.target.value})} className="px-3 py-2 rounded-md bg-[#18181B] border-[#302E2A] text-[#F5F1E8]">
           <option value="">All Modes</option><option value="ONLINE">Online</option><option value="OFFLINE">Offline</option>
         </select>
-        <select value={filter.status} onChange={e => setFilter({...filter,status:e.target.value})} className="px-3 py-2 rounded-md">
+        <select value={filter.status} onChange={e => setFilter({...filter,status:e.target.value})} className="px-3 py-2 rounded-md bg-[#18181B] border-[#302E2A] text-[#F5F1E8]">
           <option value="">All Statuses</option><option>PENDING</option><option>CONFIRMED</option><option>COMPLETED</option><option>CANCELLED</option>
         </select>
       </div>
@@ -1270,6 +1272,33 @@ function AdminStudents({ token }) {
   )
 }
 
+function AdminMessages({ token }) {
+  const [messages, setMessages] = useState([])
+  useEffect(() => { api('contact', { token }).then(r => setMessages(r.messages)).catch(() => {}) }, [token])
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <h1 className="font-display text-4xl mb-6">Contact Messages</h1>
+      <div className="card-pp rounded-xl overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left border-b border-pp"><tr className="text-muted-pp text-xs tracking-widest"><th className="p-4">NAME</th><th>EMAIL</th><th>PHONE</th><th>MESSAGE</th><th>DATE</th></tr></thead>
+          <tbody>
+            {messages.map(m => (
+              <tr key={m.id} className="border-b border-pp last:border-0">
+                <td className="p-4">{m.name}</td>
+                <td>{m.email}</td>
+                <td>{m.phone || '-'}</td>
+                <td className="max-w-md truncate">{m.message}</td>
+                <td>{new Date(m.createdAt).toLocaleDateString('en-IN')}</td>
+              </tr>
+            ))}
+            {messages.length === 0 && <tr><td colSpan={5} className="p-10 text-center text-muted-pp">No messages yet.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 // ============ APP ROOT ============
 function App() {
   const [view, setView] = useState('home')
@@ -1294,7 +1323,7 @@ function App() {
   const refreshUser = () => api('auth/me', { token }).then(r => { setUser(r.user); localStorage.setItem('ppa_user', JSON.stringify(r.user)) })
 
   const requireAuth = (v) => {
-    if (!user && ['dashboard','myBookings','paymentHistory','profile','adminDashboard','adminBookings','adminClasses','adminStudents'].includes(v)) return 'login'
+    if (!user && ['dashboard','myBookings','paymentHistory','profile','adminDashboard','adminBookings','adminClasses','adminStudents','adminMessages'].includes(v)) return 'login'
     return v
   }
 
@@ -1322,6 +1351,7 @@ function App() {
         {currentView === 'adminBookings' && user?.role === 'ADMIN' && <AdminBookings token={token} />}
         {currentView === 'adminClasses' && user?.role === 'ADMIN' && <AdminClasses token={token} />}
         {currentView === 'adminStudents' && user?.role === 'ADMIN' && <AdminStudents token={token} />}
+        {currentView === 'adminMessages' && user?.role === 'ADMIN' && <AdminMessages token={token} />}
       </main>
       <Footer setView={setView} />
       <FloatingButtons />

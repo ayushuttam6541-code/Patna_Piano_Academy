@@ -348,6 +348,12 @@ async function handle(request: Request, method: string) {
     return ok({ ok: true })
   }
 
+  if (method === 'GET' && r0 === 'contact') {
+    const u = getUser(request); if (!u || (u as any).role !== 'ADMIN') return fail('Forbidden', 403)
+    const messages = await database.collection('contact_messages').find({}).sort({ createdAt: -1 }).toArray()
+    return ok({ messages: messages.map(({ _id, ...m }) => m) })
+  }
+
   return fail('Not found', 404)
 }
 
