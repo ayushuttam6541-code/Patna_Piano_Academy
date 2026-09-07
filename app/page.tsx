@@ -98,7 +98,7 @@ function Navbar({ view, setView, user, logout }: { view: string; setView: (v: st
   const [profileOpen, setProfileOpen] = useState(false)
   const nav = [
     ['Home', 'home'], ['About', 'about'], ['Classes', 'classes'],
-    ['How It Works', 'how'], ['Testimonials', 'testimonials'], ['Contact', 'contact']
+    ['Videos', 'videos'], ['How It Works', 'how'], ['Testimonials', 'testimonials'], ['Contact', 'contact']
   ]
   const go = (v: string) => { setView(v); setOpen(false); setProfileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
@@ -135,6 +135,7 @@ function Navbar({ view, setView, user, logout }: { view: string; setView: (v: st
                       <MenuItem icon={LayoutDashboard} label="Admin Dashboard" onClick={() => go('adminDashboard')} />
                       <MenuItem icon={ListChecks} label="Manage Bookings" onClick={() => go('adminBookings')} />
                       <MenuItem icon={BookOpen} label="Manage Classes" onClick={() => go('adminClasses')} />
+                      <MenuItem icon={Youtube} label="Manage Videos" onClick={() => go('adminVideos')} />
                       <MenuItem icon={UsersIcon} label="Students" onClick={() => go('adminStudents')} />
                       <MenuItem icon={MessageCircle} label="Contact Messages" onClick={() => go('adminMessages')} />
                     </>
@@ -176,6 +177,7 @@ function Navbar({ view, setView, user, logout }: { view: string; setView: (v: st
                     <button onClick={() => go('adminDashboard')} className="block w-full text-left py-2 text-sm">Admin Dashboard</button>
                     <button onClick={() => go('adminBookings')} className="block w-full text-left py-2 text-sm">Manage Bookings</button>
                     <button onClick={() => go('adminClasses')} className="block w-full text-left py-2 text-sm">Manage Classes</button>
+                    <button onClick={() => go('adminVideos')} className="block w-full text-left py-2 text-sm">Manage Videos</button>
                     <button onClick={() => go('adminStudents')} className="block w-full text-left py-2 text-sm">Students</button>
                     <button onClick={() => go('adminMessages')} className="block w-full text-left py-2 text-sm">Contact Messages</button>
                   </>
@@ -218,7 +220,7 @@ function Footer({ setView }) {
           <div>
             <h4 className="font-display text-gold text-sm tracking-wide mb-4">EXPLORE</h4>
             <ul className="space-y-2 text-sm">
-              {[['Home','home'],['About','about'],['Classes','classes'],['Booking','book'],['Contact','contact'],['Login','login']].map(([l,v]) => (
+              {[['Home','home'],['About','about'],['Classes','classes'],['Videos','videos'],['Booking','book'],['Contact','contact'],['Login','login']].map(([l,v]) => (
                 <li key={v}><button onClick={() => setView(v)} className="text-[#F5F1E8]/80 hover:text-gold">{l}</button></li>
               ))}
             </ul>
@@ -542,6 +544,83 @@ function Testimonials() {
           </div>
         ))}
       </div>
+    </section>
+  )
+}
+
+// ============ VIDEOS ============
+function VideosPage() {
+  const [videos, setVideos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchVideos()
+  }, [])
+
+  const fetchVideos = async () => {
+    try {
+      const res = await fetch('/api/videos')
+      const data = await res.json()
+      setVideos(data.videos || [])
+    } catch (error) {
+      console.error('Failed to fetch videos:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const extractVideoId = (url: string) => {
+    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+    return match ? match[1] : null
+  }
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="text-center mb-14">
+        <p className="text-gold text-xs tracking-[0.3em] mb-3">VIDEOS</p>
+        <h2 className="font-display text-4xl md:text-5xl">Piano <span className="gold-gradient-text italic">Video Tutorials</span></h2>
+        <p className="mt-4 text-muted-pp max-w-2xl mx-auto">Watch our piano tutorials, student performances, and teaching demonstrations to learn more about our teaching style.</p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="text-muted-pp">Loading videos...</div>
+        </div>
+      ) : videos.length === 0 ? (
+        <div className="text-center py-20">
+          <div className="text-muted-pp">No videos available yet. Check back soon!</div>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {videos.map((video: any) => {
+            const videoId = extractVideoId(video.url)
+            if (!videoId) return null
+
+            return (
+              <div key={video._id} className="card-pp rounded-xl overflow-hidden">
+                <div className="aspect-video bg-black">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title={video.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="font-display text-lg mb-2">{video.title}</h3>
+                  {video.description && (
+                    <p className="text-sm text-muted-pp line-clamp-2">{video.description}</p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </section>
   )
 }
@@ -1169,6 +1248,87 @@ function AdminBookings({ token }) {
   )
 }
 
+function AdminVideos({ token }) {
+  const [videos, setVideos] = useState([])
+  const [editing, setEditing] = useState(null)
+  const load = () => api('videos').then(r => setVideos(r.videos))
+  useEffect(() => { load() }, [])
+  const save = async (v) => {
+    try {
+      if (v.id && videos.find(x => x.id === v.id)) {
+        await api(`videos/${v.id}`, { method: 'PUT', token, body: v })
+        toast.success('Video updated')
+      } else {
+        await api('videos', { method: 'POST', token, body: v })
+        toast.success('Video added')
+      }
+      setEditing(null); load()
+    } catch (e) { toast.error(e.message) }
+  }
+  const remove = async (id) => { if (!confirm('Delete video?')) return; try { await api(`videos/${id}`, { method: 'DELETE', token }); load() } catch (e) { toast.error(e.message) } }
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="flex justify-between items-center mb-6"><h1 className="font-display text-4xl">Manage Videos</h1><button onClick={() => setEditing({ title:'', url:'', description:'' })} className="btn-gold px-4 py-2 rounded-md flex items-center gap-2"><Plus className="h-4 w-4"/>Add Video</button></div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {videos.map(v => (
+          <div key={v.id} className="card-pp rounded-xl overflow-hidden">
+            <div className="aspect-video bg-black">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${v.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || ''}`}
+                title={v.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            <div className="p-4">
+              <div className="font-display text-lg mb-1">{v.title}</div>
+              {v.description && <p className="text-xs text-muted-pp line-clamp-2">{v.description}</p>}
+              <div className="flex gap-2 mt-3">
+                <button onClick={() => setEditing(v)} className="flex-1 text-xs border border-pp rounded-md py-2 hover:border-gold flex items-center justify-center gap-1"><Edit3 className="h-3 w-3"/>Edit</button>
+                <button onClick={() => remove(v.id)} className="flex-1 text-xs border border-pp rounded-md py-2 hover:border-red-500 text-red-400 flex items-center justify-center gap-1"><Trash2 className="h-3 w-3"/>Delete</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {editing && <VideoEditor v={editing} onSave={save} onClose={() => setEditing(null)} />}
+    </div>
+  )
+}
+
+function VideoEditor({ v, onSave, onClose }) {
+  const [form, setForm] = useState(v)
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+      <div className="bg-card-pp border border-pp rounded-xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4"><h2 className="font-display text-2xl">{v.id ? 'Edit' : 'Add'} Video</h2><button onClick={onClose}><X /></button></div>
+        <div className="space-y-3">
+          <div>
+            <Label>Title</Label>
+            <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Video title" />
+          </div>
+          <div>
+            <Label>YouTube URL</Label>
+            <Input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Video description" rows={3} />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button onClick={() => onSave(form)} className="btn-gold flex-1 py-2 rounded-md">Save</button>
+            <button onClick={onClose} className="flex-1 border border-pp py-2 rounded-md hover:border-gold">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AdminClasses({ token }) {
   const [classes, setClasses] = useState([])
   const [editing, setEditing] = useState(null)
@@ -1334,6 +1494,7 @@ function App() {
         {currentView === 'home' && <Home setView={setView} setBookingClass={setBookingClass} classes={classes} />}
         {currentView === 'about' && <About setView={setView} />}
         {currentView === 'classes' && <ClassesPage classes={classes} setView={setView} setBookingClass={setBookingClass} />}
+        {currentView === 'videos' && <VideosPage />}
         {currentView === 'how' && <HowItWorks />}
         {currentView === 'testimonials' && <Testimonials />}
         {currentView === 'contact' && <ContactPage />}
@@ -1348,6 +1509,7 @@ function App() {
         {currentView === 'adminDashboard' && user?.role === 'ADMIN' && <AdminDashboard token={token} />}
         {currentView === 'adminBookings' && user?.role === 'ADMIN' && <AdminBookings token={token} />}
         {currentView === 'adminClasses' && user?.role === 'ADMIN' && <AdminClasses token={token} />}
+        {currentView === 'adminVideos' && user?.role === 'ADMIN' && <AdminVideos token={token} />}
         {currentView === 'adminStudents' && user?.role === 'ADMIN' && <AdminStudents token={token} />}
         {currentView === 'adminMessages' && user?.role === 'ADMIN' && <AdminMessages token={token} />}
       </main>

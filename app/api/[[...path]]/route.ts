@@ -354,6 +354,36 @@ async function handle(request: Request, method: string) {
     return ok({ messages: messages.map(({ _id, ...m }) => m) })
   }
 
+  // -------- Videos --------
+  if (method === 'GET' && r0 === 'videos') {
+    const videos = await database.collection('videos').find({}).sort({ createdAt: -1 }).toArray()
+    return ok({ videos: videos.map(({ _id, ...v }) => v) })
+  }
+
+  if (method === 'POST' && r0 === 'videos') {
+    const u = getUser(request); if (!u || (u as any).role !== 'ADMIN') return fail('Forbidden', 403)
+    const body = await request.json()
+    const { title, url, description } = body || {}
+    if (!title || !url) return fail('Title and URL are required')
+    const video = { id: uuidv4(), title, url, description: description || '', createdAt: new Date() }
+    await database.collection('videos').insertOne(video)
+    return ok({ video: { ...video, _id: undefined } })
+  }
+
+  if (method === 'PUT' && r0 === 'videos' && r1) {
+    const u = getUser(request); if (!u || (u as any).role !== 'ADMIN') return fail('Forbidden', 403)
+    const body = await request.json()
+    const { title, url, description } = body || {}
+    await database.collection('videos').updateOne({ id: r1 }, { $set: { title, url, description } })
+    return ok({ ok: true })
+  }
+
+  if (method === 'DELETE' && r0 === 'videos' && r1) {
+    const u = getUser(request); if (!u || (u as any).role !== 'ADMIN') return fail('Forbidden', 403)
+    await database.collection('videos').deleteOne({ id: r1 })
+    return ok({ ok: true })
+  }
+
   return fail('Not found', 404)
 }
 
